@@ -265,15 +265,19 @@
         <!-- Chat header -->
         <div class="chat-header">
           <div class="chat-header-user">
-            <div class="conv-avatar">
+            <a href="profile.php?id=<?= (int)$other_user['id'] ?>" class="conv-avatar conv-avatar--link" title="View profile">
               <?php if (!empty($other_user['avatar'])): ?>
                 <img src="assets/img/<?= htmlspecialchars($other_user['avatar']) ?>.png" alt="" class="avatar-pixel-img" />
               <?php else: ?>
                 <?= strtoupper($other_user['name'][0] ?? '?') ?>
               <?php endif; ?>
-            </div>
+            </a>
             <div>
-              <div class="chat-header-name"><?= htmlspecialchars($other_user['name']) ?></div>
+              <div class="chat-header-name">
+                <a href="profile.php?id=<?= (int)$other_user['id'] ?>" class="lp-seller-name-link">
+                  <?= htmlspecialchars($other_user['name']) ?>
+                </a>
+              </div>
               <?php if (!empty($other_user['course'])): ?>
                 <div class="chat-header-course"><?= htmlspecialchars($other_user['course']) ?></div>
               <?php endif; ?>
@@ -633,11 +637,15 @@
             const headerUser = chatHeaderEl.querySelector('.chat-header-user');
             if (headerUser) {
               headerUser.innerHTML = `
-                <div class="conv-avatar">
+                <a href="profile.php?id=${d.other_user.id}" class="conv-avatar conv-avatar--link" title="View profile">
                   <img src="assets/img/${escAttr(d.other_user.avatar)}.png" alt="" class="avatar-pixel-img" />
-                </div>
+                </a>
                 <div>
-                  <div class="chat-header-name">${escHtml(d.other_user.name)}</div>
+                  <div class="chat-header-name">
+                    <a href="profile.php?id=${d.other_user.id}" class="lp-seller-name-link">
+                      ${escHtml(d.other_user.name)}
+                    </a>
+                  </div>
                   ${d.other_user.course ? `<div class="chat-header-course">${escHtml(d.other_user.course)}</div>` : ''}
                 </div>`;
             }

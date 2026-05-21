@@ -6,7 +6,6 @@
   */
 
   session_start();
-
   require_once "includes/db.php";
 
   if (!isset($_SESSION['user'])) {
@@ -14,14 +13,17 @@
     exit;
   }
 
-  $user_id = $_SESSION['user']['id'];
-?>
+  $logged_in_id = (int)$_SESSION['user']['id'];
+  $view_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-<!-- PHP UI/UX Logic -->
-<?php
-  $activePage = "profile";
-  $pageTitle = "My Profile";
-  include "includes/header.php";
+  // If viewing own profile without ?id or with own ?id - show edit mode
+  $is_own_profile = ($view_id === 0 || $view_id === $logged_in_id);
+
+  if ($is_own_profile) {
+    $user_id = $logged_in_id;
+  } else {
+    $user_id = $view_id;
+  }
 ?>
 
 <!-- PHP Database Query -->
@@ -32,7 +34,8 @@
   $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
   if (!$user) {
-    die("User not found.");
+    header('Location: browse.php');
+    exit;
   }
 
   // User Password
@@ -125,9 +128,9 @@
 
   // Handle form submission
   $success = false;
-  $errors  = [];
+  $errors = [];
 
-  if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  if ($is_own_profile && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // User Info
     $name = trim($_POST['name'] ?? '');
     $course = trim($_POST['course'] ?? '');
@@ -237,31 +240,34 @@
   // User Stats
 
   // Active listings
-  $stmt = $pdo->prepare("
-    SELECT COUNT(*) 
-    FROM items 
-    WHERE seller_id = ? AND status = 'active'
-  ");
+  $stmt = $pdo->prepare("SELECT COUNT(*) FROM items WHERE seller_id = ? AND status = 'active'");
   $stmt->execute([$user_id]);
   $activeListings = $stmt->fetchColumn();
 
   // Items sold
-  $stmt = $pdo->prepare("
-    SELECT COUNT(*) 
-    FROM items 
-    WHERE seller_id = ? AND status = 'sold'
-  ");
+  $stmt = $pdo->prepare("SELECT COUNT(*) FROM items WHERE seller_id = ? AND status = 'sold'");
   $stmt->execute([$user_id]);
   $soldItems = $stmt->fetchColumn();
 
   // Purchases
-  $stmt = $pdo->prepare("
-    SELECT COUNT(*) 
-    FROM transactions 
-    WHERE buyer_id = ? AND status = 'completed'
-  ");
+  $stmt = $pdo->prepare("SELECT COUNT(*) FROM transactions WHERE buyer_id = ? AND status = 'completed'");
   $stmt->execute([$user_id]);
   $purchases = $stmt->fetchColumn();
+
+  // Fetch public listings for public profile view
+  if (!$is_own_profile) {
+    $stmt = $pdo->prepare("
+      SELECT items.item_id, items.title, items.price, items.image_path,
+          items.condition_type, items.created_at, categories.name AS category
+      FROM items
+      JOIN categories ON items.category_id = categories.category_id
+      WHERE items.seller_id = ? AND items.status = 'active'
+      ORDER BY items.created_at DESC
+      LIMIT 4
+    ");
+    $stmt->execute([$user_id]);
+    $public_listings = $stmt->fetchAll();
+  }
 
   // Function that returns an <img> tag pointing to the pixel art PNG.
   function get_avatar_img(string $id): string {
@@ -272,6 +278,173 @@
     />';
   }
 ?>
+
+<!-- PHP UI/UX Logic -->
+<?php
+  $activePage = "profile";
+  $pageTitle = $is_own_profile ? 'My Profile' : htmlspecialchars($user['name']) . "'s Profile";
+  include "includes/header.php";
+?>
+
+<?php if (!$is_own_profile): ?>
+<div class="profile-page">
+
+  <div class="profile-page-header">
+    <div>
+      <h1><?= htmlspecialchars($user['name']) ?></h1>
+      <p><?= !empty($user['course']) ? htmlspecialchars($user['course']) : 'CvSU Student' ?></p>
+    </div>
+    <a href="javascript:history.back()" class="btn-back">Go Back</a>
+  </div>
+
+  <div class="pub-profile-grid">
+
+    <!-- Left column -->
+    <div class="profile-left">
+
+      <!-- Avatar card -->
+      <div class="current-avatar-card">
+        <div class="current-avatar pub-avatar-lg">
+          <?php if (!empty($user['avatar'])): ?>
+            <img src="assets/img/<?= htmlspecialchars($user['avatar']) ?>.png" alt="<?= htmlspecialchars($user['name']) ?>" class="avatar-pixel-img" />
+          <?php else: ?>
+            <?= strtoupper($user['name'][0] ?? '?') ?>
+          <?php endif; ?>
+        </div>
+        <div class="current-avatar-name"><?= htmlspecialchars($user['name']) ?></div>
+        <?php if (!empty($user['year_level'])): ?>
+          <p class="current-avatar-hint"><?= htmlspecialchars($user['year_level']) ?></p>
+        <?php endif; ?>
+        <p class="current-avatar-hint">Member since <?= date('F Y', strtotime($user['created_at'])) ?></p>
+      </div>
+
+      <!-- Stats card -->
+      <div class="profile-stats-card">
+        <h3 class="card-title">Stats</h3>
+        <div class="profile-stats">
+          <div class="profstat">
+            <div class="profstat-value"><?= $activeListings ?></div>
+            <div class="profstat-label">Active Listings</div>
+          </div>
+          <div class="profstat">
+            <div class="profstat-value"><?= $soldItems ?></div>
+            <div class="profstat-label">Items Sold</div>
+          </div>
+          <div class="profstat">
+            <div class="profstat-value"><?= $purchases ?></div>
+            <div class="profstat-label">Purchases</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right column -->
+    <div class="profile-right">
+
+      <div class="profile-fields-card">
+        <h3 class="card-title">About</h3>
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <div class="pub-field-value"><?= htmlspecialchars($user['name']) ?></div>
+        </div>
+
+        <?php if (!empty($user['course'])): ?>
+          <div class="form-group">
+            <label>Course</label>
+            <div class="pub-field-value"><?= htmlspecialchars($user['course']) ?></div>
+          </div>
+        <?php else: ?>
+          <div class="form-group">
+            <label>Course</label>
+            <div class="pub-field-value">No course specified.</div>
+          </div>
+        <?php endif; ?>
+
+        <?php if (!empty($user['year_level'])): ?>
+          <div class="form-group">
+            <label>Year Level</label>
+            <div class="pub-field-value"><?= htmlspecialchars($user['year_level']) ?></div>
+          </div>
+        <?php else: ?>
+          <div class="form-group">
+            <label>Year Level</label>
+            <div class="pub-field-value">Year level not specified.</div>
+          </div>
+        <?php endif; ?>
+
+        <?php if (!empty($user['bio'])): ?>
+          <div class="form-group">
+            <label>Bio</label>
+            <div class="pub-field-value pub-field-bio"><?= nl2br(htmlspecialchars($user['bio'])) ?></div>
+          </div>
+        <?php else: ?>
+          <div class="form-group">
+            <label>Bio</label>
+            <div class="pub-field-value">No bio yet.</div>
+          </div>
+        <?php endif; ?>
+
+        <?php if (!empty($user['contact_info'])): ?>
+          <div class="form-group" style="margin-bottom:0">
+            <label>Contact / Messenger</label>
+            <div class="pub-field-value"><?= htmlspecialchars($user['contact_info']) ?></div>
+          </div>
+        <?php else: ?>
+          <div class="form-group">
+            <label>Contact / Messenger</label>
+            <div class="pub-field-value">No contact specified.</div>
+          </div>
+        <?php endif; ?>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Listings below full width -->
+  <?php if (!empty($public_listings)): ?>
+    <div class="pub-listings-section">
+      <h2 class="pub-listings-title">Listings by <?= htmlspecialchars($user['name']) ?></h2>
+      <div class="pub-listings-grid">
+        <?php foreach ($public_listings as $listing): ?>
+          <a href="listing.php?id=<?= (int)$listing['item_id'] ?>" class="pub-listing-card">
+            <div class="pub-listing-img">
+              <?php
+                $img = "uploads/" . $listing['image_path'];
+                if (!empty($listing['image_path']) && file_exists($img)):
+              ?>
+                <img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($listing['title']) ?>" />
+              <?php else: ?>
+                <?= $imgNotAvailableIcon ?>
+              <?php endif; ?>
+              <span class="pub-listing-condition"><?= htmlspecialchars($listing['condition_type']) ?></span>
+            </div>
+            <div class="pub-listing-info">
+              <div class="pub-listing-category"><?= htmlspecialchars($listing['category']) ?></div>
+              <div class="pub-listing-title"><?= htmlspecialchars($listing['title']) ?></div>
+              <div class="pub-listing-price">&#8369;<?= number_format($listing['price'], 2) ?></div>
+            </div>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  <?php else: ?>
+    <div class="pub-listings-section">
+      <h2 class="pub-listings-title">Listings by <?= htmlspecialchars($user['name']) ?></h2>
+      <div class="pub-no-listings">
+        <p>This user has no active listings.</p>
+      </div>
+    </div>
+  <?php endif; ?>
+
+</div>
+
+<?php include 'includes/footer.php'; ?>
+<?php exit; ?>
+<?php endif; ?>
 
 <div class="profile-page">
 

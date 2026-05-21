@@ -114,3 +114,4 @@ There's still room for improvement on the color scheme of my themes like in hove
 - Notifications are triggered by reactions, comments, replies, messages, and transaction status changes
 - Refactored listing page CSS to use namespaced `lp-` prefixed classes to prevent style collisions with other pages
 - Implemented a forgot password system with email OTP verification using PHPMailer and SMTP
+- Added viewing of other users’ profiles feature with public seller information and listings display

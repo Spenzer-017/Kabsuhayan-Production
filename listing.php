@@ -373,15 +373,19 @@
       <div class="lp-section">
         <div class="lp-section-label">Seller</div>
         <div class="lp-seller-card">
-          <div class="lp-seller-avatar">
+          <a href="profile.php?id=<?= (int)$item['seller_id'] ?>" class="lp-seller-avatar lp-seller-avatar--link" title="View <?= htmlspecialchars($item['seller_name']) ?>'s profile">
             <?php if (!empty($item['seller_avatar'])): ?>
               <img src="assets/img/<?= htmlspecialchars($item['seller_avatar']) ?>.png" alt="<?= htmlspecialchars($item['seller_name']) ?>" class="avatar-pixel-img"/>
             <?php else: ?>
               <?= strtoupper($item['seller_name'][0] ?? '?') ?>
             <?php endif; ?>
-          </div>
+          </a>
           <div>
-            <div class="lp-seller-name"><?= htmlspecialchars($item['seller_name']) ?></div>
+            <div class="lp-seller-name">
+              <a href="profile.php?id=<?= (int)$item['seller_id'] ?>" class="lp-seller-name-link">
+                <?= htmlspecialchars($item['seller_name']) ?>
+              </a>
+            </div>
             <?php if (!empty($item['seller_course'])): ?>
               <div class="lp-seller-course"><?= htmlspecialchars($item['seller_course']) ?></div>
             <?php endif; ?>
