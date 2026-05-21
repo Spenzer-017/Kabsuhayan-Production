@@ -6,10 +6,10 @@
   Then use $pdo for all queries.
 */
 
-$host = 'localhost';
-$dbname = 'cvsu_marketplace';
-$user = 'root';
-$pass = '';
+$host = 'sql305.infinityfree.com';
+$dbname = 'if0_41986425_cvsu_marketplace';
+$user = 'if0_41986425';
+$pass = 'yAFKHWM1hlep';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
@@ -24,5 +24,5 @@ try {
   $pdo = new PDO($dsn, $user, $pass, $options);
   $pdo->exec("SET time_zone = '+08:00'");
 } catch (PDOException $e) {
-  die('Database connection failed.' . $e->getMessage());
+  die('Database connection failed. Please try again later.');
 }
