@@ -23,10 +23,10 @@
             $mail->Port = $_ENV['MAIL_PORT'];
 
             // Sender (always your email)
-            $mail->setFrom($_ENV['MAIL_USERNAME'], 'Kabsuhayan Support');
+            $mail->setFrom($_ENV['MAIL_FROM'], 'Kabsuhayan Support');
 
             // Receiver (your inbox)
-            $mail->addAddress($_ENV['MAIL_USERNAME']);
+            $mail->addAddress($_ENV['MAIL_FROM']);
 
             // User becomes reply-to
             $mail->addReplyTo($fromEmail, $fromName);
@@ -115,7 +115,7 @@
             <tr>
                 <td style='background:#f8f8f5;padding:18px 40px;border-top:1px solid #e8e8e0;text-align:center;'>
                 <p style='margin:0;color:#aaa;font-size:12px;'>
-                    &copy; {$year} {$appName} &mdash; Cavite State University<br>
+                    &copy; {$year} {$appName}. Made by Thumbtack's Team<br>
                     This is an automated message, please do not reply.
                 </p>
                 </td>
@@ -139,7 +139,7 @@
             $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'];
             $mail->Port = $_ENV['MAIL_PORT'];
 
-            $mail->setFrom($_ENV['MAIL_USERNAME'], 'Kabsuhayan');
+            $mail->setFrom($_ENV['MAIL_FROM'], 'Kabsuhayan');
             $mail->addAddress($toEmail, $toName);
 
             $mail->isHTML(true);
@@ -313,7 +313,7 @@
         </tr>
         <tr>
             <td style='background:#f8f8f5;padding:18px 40px;border-top:1px solid #e8e8e0;text-align:center;'>
-            <p style='margin:0;color:#aaa;font-size:12px;'>&copy; {$year} Kabsuhayan &mdash; Cavite State University<br>This is an automated message, please do not reply.</p>
+            <p style='margin:0;color:#aaa;font-size:12px;'>&copy; {$year} Kabsuhayan. Made by Thumbtack's Team<br>This is an automated message, please do not reply.</p>
             </td>
         </tr>
         </table>
@@ -332,7 +332,7 @@
             $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'];
             $mail->Port = $_ENV['MAIL_PORT'];
 
-            $mail->setFrom($_ENV['MAIL_USERNAME'], 'Kabsuhayan');
+            $mail->setFrom($_ENV['MAIL_FROM'], 'Kabsuhayan');
             $mail->addAddress($toEmail, $toName);
 
             $mail->isHTML(true);
