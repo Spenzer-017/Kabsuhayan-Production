@@ -85,7 +85,7 @@ CREATE TABLE comments (
     updated_at DATETIME DEFAULT NULL,
     FOREIGN KEY (commenter_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE CASCADE,
-    FOREIGN KEY (parent_id) REFERENCES comments(comment_id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_id) REFERENCES comments(comment_id) ON DELETE CASCADE
 );
 
 -- TABLE: transactions
