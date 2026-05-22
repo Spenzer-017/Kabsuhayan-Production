@@ -263,10 +263,11 @@
       JOIN categories ON items.category_id = categories.category_id
       WHERE items.seller_id = ? AND items.status = 'active'
       ORDER BY items.created_at DESC
-      LIMIT 4
     ");
     $stmt->execute([$user_id]);
-    $public_listings = $stmt->fetchAll();
+    $all_listings = $stmt->fetchAll();
+    // Slice first 4 for the preview
+    $public_listings = array_slice($all_listings, 0, 4);
   }
 
   // Function that returns an <img> tag pointing to the pixel art PNG.
@@ -405,9 +406,13 @@
   </div>
 
   <!-- Listings below full width -->
-  <?php if (!empty($public_listings)): ?>
-    <div class="pub-listings-section">
+  <div class="pub-listings-section">
+    <div class="pub-listings-header">
       <h2 class="pub-listings-title">Listings by <?= htmlspecialchars($user['name']) ?></h2>
+      <button class="btn-viewall-listings" id="btnViewAllListings">View all</button>
+    </div>
+
+    <?php if (!empty($public_listings)): ?>
       <div class="pub-listings-grid">
         <?php foreach ($public_listings as $listing): ?>
           <a href="listing.php?id=<?= (int)$listing['item_id'] ?>" class="pub-listing-card">
@@ -430,17 +435,88 @@
           </a>
         <?php endforeach; ?>
       </div>
-    </div>
-  <?php else: ?>
-    <div class="pub-listings-section">
-      <h2 class="pub-listings-title">Listings by <?= htmlspecialchars($user['name']) ?></h2>
+    <?php else: ?>
       <div class="pub-no-listings">
         <p>This user has no active listings.</p>
       </div>
-    </div>
-  <?php endif; ?>
+    <?php endif; ?>
+  </div>
 
 </div>
+
+<?php if (!$is_own_profile): ?>
+<div class="modal-overlay" id="allListingsModal" role="dialog" aria-modal="true" aria-labelledby="allListingsModalTitle">
+  <div class="modal-box listings-modal-box">
+    <div class="listings-modal-header">
+      <h2 class="listings-modal-title" id="allListingsModalTitle">
+        Listings by <?= htmlspecialchars($user['name']) ?>
+      </h2>
+      <button class="listings-modal-close" id="allListingsModalClose" aria-label="Close">
+        <?= $closeIcon ?>
+      </button>
+    </div>
+
+    <?php if (!empty($all_listings)): ?>
+      <div class="listings-modal-grid pub-listings-grid">
+        <?php foreach ($all_listings as $listing): ?>
+          <a href="listing.php?id=<?= (int)$listing['item_id'] ?>" class="pub-listing-card">
+            <div class="pub-listing-img">
+              <?php
+                $img = "uploads/" . $listing['image_path'];
+                if (!empty($listing['image_path']) && file_exists($img)):
+              ?>
+                <img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($listing['title']) ?>" />
+              <?php else: ?>
+                <?= $imgNotAvailableIcon ?>
+              <?php endif; ?>
+              <span class="pub-listing-condition"><?= htmlspecialchars($listing['condition_type']) ?></span>
+            </div>
+              <div class="pub-listing-info">
+                <div class="pub-listing-category"><?= htmlspecialchars($listing['category']) ?></div>
+                <div class="pub-listing-title"><?= htmlspecialchars($listing['title']) ?></div>
+                <div class="pub-listing-price">&#8369;<?= number_format($listing['price'], 2) ?></div>
+              </div>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    <?php else: ?>
+      <div class="pub-no-listings" style="padding: 32px 24px;">
+        <p>This user has no active listings.</p>
+      </div>
+    <?php endif; ?>
+
+  </div>
+</div>
+
+<script>
+  (function () {
+    const overlay = document.getElementById('allListingsModal');
+    const btnOpen = document.getElementById('btnViewAllListings');
+    const btnClose = document.getElementById('allListingsModalClose');
+
+    function openModal() {
+      overlay.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      overlay.classList.remove('modal-open');
+      document.body.style.overflow = '';
+    }
+
+    if (btnOpen) btnOpen.addEventListener('click', openModal);
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('modal-open')) closeModal();
+    });
+  })();
+</script>
+<?php endif; ?>
 
 <?php include 'includes/footer.php'; ?>
 <?php exit; ?>

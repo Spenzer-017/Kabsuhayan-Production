@@ -87,8 +87,9 @@
     <title>
         <?= isset($pageTitle) ? $pageTitle . " | Kabsuhayan" : "Kabsuhayan | CvSU Marketplace" ?>
     </title>
-    <link rel="stylesheet" href="css/style.css?v=<?php echo time(); ?>" /> <!--Remove script at deployment -->
-    <script type="text/javascript" src="js/includes.js?v=<?php echo time(); ?>" defer></script> <!-- Remove here also -->
+    <link rel="icon" href="assets/img/favicon.ico">
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/includes.js" defer></script>
 </head>
 
 <body>

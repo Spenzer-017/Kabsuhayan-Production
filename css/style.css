@@ -3044,9 +3044,9 @@ input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-i
   font-size: 1rem;
   font-weight: 700;
   color: var(--text-dark);
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .pub-no-listings {
@@ -3067,16 +3067,18 @@ input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-i
 
 .pub-listing-card {
   background: var(--contrast-bg);
-  border: 1px solid var(--border-light);
+  border: 2px solid var(--border-light);
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.16s, box-shadow 0.16s;
   text-decoration: none;
+  display: block;
 }
 
 .pub-listing-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border-color: var(--primary-light);
 }
 
 .pub-listing-img {
@@ -3168,10 +3170,160 @@ input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-i
   color: var(--primary);
 }
 
+/* Wider box override for the listings modal */
+.listings-modal-box {
+  max-width: 860px;
+  width: 100%;
+  max-height: 82vh;
+  padding: 0;
+  align-items: stretch;
+  text-align: left;
+  overflow: hidden;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sticky header inside the modal */
+.listings-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border-light);
+  position: sticky;
+  top: 0;
+  background-color: var(--contrast-bg);
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.listings-modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-width: 0;  
+}
+
+.listings-modal-count {
+  background-color: var(--surface-tint);
+  color: var(--surface-tint-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 20px;
+}
+
+.listings-modal-close {
+  background: var(--hover-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  margin-left: 12px;
+}
+
+.listings-modal-close:hover {
+  background-color: var(--theme-hover-bg);
+}
+
+.listings-modal-close svg {
+  fill: var(--text-dark);
+  width: 18px;
+  height: 18px;
+}
+
+/* Scrollable grid area */
+.listings-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 20px 24px 24px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.pub-listings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.pub-listings-header .pub-listings-title {
+  margin-bottom: 0;
+}
+
+.btn-viewall-listings {
+  background: none;
+  border: none;
+  color: var(--primary-light);
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.2s;
+}
+
+.btn-viewall-listings:hover {
+  color: var(--primary);
+}
+
+.listings-modal-grid .pub-listing-card {
+  min-width: 0;
+  overflow: visible; 
+  height: auto;
+}
+
+.listings-modal-grid.pub-listings-grid {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}
+
+.listings-modal-grid .pub-listing-card .pub-listing-img {
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+}
+
 /* Responsiveness */
 @media (max-width: 480px) {
   .pub-listings-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .listings-modal-box {
+    max-height: 90vh;
+    border-radius: 12px;
+  }
+
+  .listings-modal-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    padding: 16px;
+    max-height: calc(90vh - 70px);
+  }
+
+  .listings-modal-header {
+    padding: 16px;
   }
 }
 
